@@ -12,9 +12,6 @@ interface CompLike {
 }
 
 contract CErc20 is CToken, CErc20Interface, UUPSUpgradeable {
-
-
-
     function initialize(
         address _underlying,
         ComptrollerInterface _comptroller,
@@ -23,15 +20,21 @@ contract CErc20 is CToken, CErc20Interface, UUPSUpgradeable {
         string memory _name,
         string memory _symbol,
         uint8 _decimals
-    ) public initializer{
+    ) public initializer {
         __UUPSUpgradeable_init();
-        super.initialize(_comptroller,_interestRateModel,_initialExchangeRateMantissa,_name,_symbol, _decimals);
+        super.initialize(
+            _comptroller,
+            _interestRateModel,
+            _initialExchangeRateMantissa,
+            _name,
+            _symbol,
+            _decimals
+        );
 
         underlying = _underlying;
 
         //防御性机制
         IERC20(underlying).totalSupply();
-
     }
 
     function mint(uint256 mintAmount) external override returns (bool) {
@@ -59,29 +62,32 @@ contract CErc20 is CToken, CErc20Interface, UUPSUpgradeable {
         return true;
     }
 
-    function repayBorrowBehalf(address borrower, uint256 repayAmount) external override returns (bool) {
-        repayBorrowBehalfInternal(borrower, repayAmount);
-        return true;
-    }
-
-    function liquidateBorrow(address borrower, uint256 repayAmount, CTokenInterface cTokenCollateral)
+    function repayBorrowBehalf(address borrower, uint256 repayAmount)
         external
         override
         returns (bool)
     {
+        repayBorrowBehalfInternal(borrower, repayAmount);
+        return true;
+    }
+
+    function liquidateBorrow(
+        address borrower,
+        uint256 repayAmount,
+        CTokenInterface cTokenCollateral
+    ) external override returns (bool) {
         liquidateBorrowInternal(borrower, repayAmount, cTokenCollateral);
         return true;
     }
 
-
-    function sweepToken(IERC20 token) external override onlyOwner{
+    function sweepToken(IERC20 token) external override onlyOwner {
         require(address(token) != underlying, "CErc20::sweepToken: can not sweep underlying token");
         uint256 balance = token.balanceOf(address(this));
-        SafeERC20.safeTransfer(token,owner(), balance);
+        SafeERC20.safeTransfer(token, owner(), balance);
     }
 
     function _addReserves(uint256 addAmount) external override {
-         _addReservesInternal(addAmount);
+        _addReservesInternal(addAmount);
     }
 
     function getCashPrior() internal view virtual override returns (uint256) {
@@ -89,7 +95,12 @@ contract CErc20 is CToken, CErc20Interface, UUPSUpgradeable {
         return token.balanceOf(address(this));
     }
 
-    function doTransferIn(address from, uint256 amount) internal virtual override returns (uint256) {
+    function doTransferIn(address from, uint256 amount)
+        internal
+        virtual
+        override
+        returns (uint256)
+    {
         // Read from storage once
         address underlying_ = underlying;
         IERC20 token = IERC20(underlying_);
@@ -116,10 +127,11 @@ contract CErc20 is CToken, CErc20Interface, UUPSUpgradeable {
         // require(success, "TOKEN_TRANSFER_IN_FAILED");
 
         // Calculate the amount that was *actually* transferred
-        SafeERC20.safeTransferFrom(token,from, address(this),amount);
+        SafeERC20.safeTransferFrom(token, from, address(this), amount);
         uint256 balanceAfter = IERC20(underlying_).balanceOf(address(this));
         return balanceAfter - balanceBefore; // underflow already checked above, just subtract
     }
+
     function doTransferOut(address payable to, uint256 amount) internal virtual override {
         IERC20 token = IERC20(underlying);
         // token.transfer(to, amount);
@@ -142,7 +154,7 @@ contract CErc20 is CToken, CErc20Interface, UUPSUpgradeable {
         //     }
         // }
         // require(success, "TOKEN_TRANSFER_OUT_FAILED");
-        SafeERC20.safeTransfer(token,to,amount);
+        SafeERC20.safeTransfer(token, to, amount);
     }
 
     /**
@@ -155,6 +167,5 @@ contract CErc20 is CToken, CErc20Interface, UUPSUpgradeable {
         CompLike(underlying).delegate(compLikeDelegatee);
     }
 
-
-    function _authorizeUpgrade(address newImplementation) internal override onlyOwner{}
+    function _authorizeUpgrade(address newImplementation) internal override onlyOwner { }
 }

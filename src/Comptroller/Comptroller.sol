@@ -644,7 +644,7 @@ contract Comptroller is
             //获取当前资产的抵押因子
             vars.collateralFactor =
                 Exp({ mantissa: markets[address(asset)].collateralFactorMantissa });
-            
+
             vars.oraclePriceMantissa = oracle.getUnderlyingPrice(asset);
             if (vars.oraclePriceMantissa == 0) {
                 return (false, 0, 0);
@@ -746,12 +746,12 @@ contract Comptroller is
         //   seizeTokens = actualRepayAmount * liquidationIncentive * priceBorrowed / (priceCollateral * exchangeRate)
         /**
          *  更直观的理解
-
-            1. actualRepayAmount * liquidationIncentive = 清算人应得的总价值（含奖励）
-            2. priceBorrowed / priceCollateral = 汇率换算，1单位抵押品值多少单位借款
-            3. / exchangeRate = 底层资产转换为cToken数量
-
-             本质上就是：清算人用借款资产偿还债务，按照价格比例（含奖励）获得等价的抵押品cToken。
+         *
+         *         1. actualRepayAmount * liquidationIncentive = 清算人应得的总价值（含奖励）
+         *         2. priceBorrowed / priceCollateral = 汇率换算，1单位抵押品值多少单位借款
+         *         3. / exchangeRate = 底层资产转换为cToken数量
+         *
+         *          本质上就是：清算人用借款资产偿还债务，按照价格比例（含奖励）获得等价的抵押品cToken。
          */
         return (true, seizeTokens);
     }

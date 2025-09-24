@@ -28,11 +28,7 @@ contract ChainlinkPriceOracle is PriceOracle, OwnableUpgradeable {
         if (priceFeed == address(0)) return 0;
 
         try AggregatorV3Interface(priceFeed).latestRoundData() returns (
-            uint80,
-            int256 answer,
-            uint256,
-            uint256 updatedAt,
-            uint80
+            uint80, int256 answer, uint256, uint256 updatedAt, uint80
         ) {
             if (answer <= 0 || block.timestamp - updatedAt > PRICE_STALENESS_THRESHOLD) {
                 return 0;

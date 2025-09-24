@@ -66,7 +66,7 @@ contract Comp {
      * @notice Construct a new Comp token
      * @param account The initial account to grant all the tokens
      */
-    constructor(address account)  {
+    constructor(address account) {
         balances[account] = uint96(totalSupply);
         emit Transfer(address(0), account, totalSupply);
     }

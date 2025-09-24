@@ -31,11 +31,11 @@ contract CTokenStorage {
 
     uint256 public totalReserves;
 
-    uint public totalSupply;
+    uint256 public totalSupply;
 
-    mapping(address => uint) internal accountTokens; 
+    mapping(address => uint256) internal accountTokens;
 
-    mapping(address => mapping(address => uint)) internal transferAllowances; 
+    mapping(address => mapping(address => uint256)) internal transferAllowances;
 
     struct BorrowSnapshot {
         uint256 principal;
