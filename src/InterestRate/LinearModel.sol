@@ -22,11 +22,7 @@ contract LinearModel is InterestRateModel {
         emit NewInterestParams(baseRatePerBlock, multiplierPerBlock);
     }
 
-    function utilizationRate(uint256 cash, uint256 borrows, uint256 reserves)
-        public
-        pure
-        returns (uint256)
-    {
+    function utilizationRate(uint256 cash, uint256 borrows, uint256 reserves) public pure returns (uint256) {
         if (borrows == 0) {
             return 0;
         }
@@ -34,22 +30,17 @@ contract LinearModel is InterestRateModel {
         return (borrows * BASE) / (cash + borrows - reserves);
     }
 
-    function getBorrowRate(uint256 cash, uint256 borrows, uint256 reserves)
-        public
-        view
-        override
-        returns (uint256)
-    {
+    function getBorrowRate(uint256 cash, uint256 borrows, uint256 reserves) public view override returns (uint256) {
         uint256 ur = utilizationRate(cash, borrows, reserves);
         return (ur * multiplierPerBlock) / BASE + baseRatePerBlock;
     }
 
-    function getSupplyRate(
-        uint256 cash,
-        uint256 borrows,
-        uint256 reserves,
-        uint256 reserveFactorMantissa
-    ) external view override returns (uint256) {
+    function getSupplyRate(uint256 cash, uint256 borrows, uint256 reserves, uint256 reserveFactorMantissa)
+        external
+        view
+        override
+        returns (uint256)
+    {
         uint256 oneMinusReserveFactor = BASE - reserveFactorMantissa;
         uint256 borrowRate = getBorrowRate(cash, borrows, reserves);
         uint256 rateToPool = (borrowRate * oneMinusReserveFactor) / BASE;

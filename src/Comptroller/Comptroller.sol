@@ -30,14 +30,10 @@ contract Comptroller is
     event NewCloseFactor(uint256 oldCloseFactorMantissa, uint256 newCloseFactorMantissa);
 
     /// @notice 当管理员更改抵押因子时触发
-    event NewCollateralFactor(
-        CToken cToken, uint256 oldCollateralFactorMantissa, uint256 newCollateralFactorMantissa
-    );
+    event NewCollateralFactor(CToken cToken, uint256 oldCollateralFactorMantissa, uint256 newCollateralFactorMantissa);
 
     /// @notice 当管理员更改清算奖励时触发
-    event NewLiquidationIncentive(
-        uint256 oldLiquidationIncentiveMantissa, uint256 newLiquidationIncentiveMantissa
-    );
+    event NewLiquidationIncentive(uint256 oldLiquidationIncentiveMantissa, uint256 newLiquidationIncentiveMantissa);
 
     /// @notice 当价格预言机发生变化时触发
     event NewPriceOracle(PriceOracle oldPriceOracle, PriceOracle newPriceOracle);
@@ -83,9 +79,7 @@ contract Comptroller is
     event CompAccruedAdjusted(address indexed user, uint256 oldCompAccrued, uint256 newCompAccrued);
 
     /// @notice 当用户的COMP应收款项被更新时触发
-    event CompReceivableUpdated(
-        address indexed user, uint256 oldCompReceivable, uint256 newCompReceivable
-    );
+    event CompReceivableUpdated(address indexed user, uint256 oldCompReceivable, uint256 newCompReceivable);
 
     /// @notice 市场的初始COMP指数
     uint224 public constant compInitialIndex = 1e36;
@@ -184,8 +178,7 @@ contract Comptroller is
     function exitMarket(address cTokenAddress) external override {
         CToken cToken = CToken(cTokenAddress);
         /* 从cToken 获取发送者持有的代币和欠款的底层资产 */
-        (bool result, uint256 tokensHeld, uint256 amountOwed,) =
-            cToken.getAccountSnapshot(msg.sender);
+        (bool result, uint256 tokensHeld, uint256 amountOwed,) = cToken.getAccountSnapshot(msg.sender);
         require(result, "exitMarket: getAccountSnapshot failed");
 
         /* 发送者在该市场中不得有未偿还的借款 */
@@ -253,12 +246,11 @@ contract Comptroller is
     }
 
     // 预留钩子
-    function mintVerify(
-        address cToken,
-        address minter,
-        uint256 actualMintAmount,
-        uint256 mintTokens
-    ) external virtual override { }
+    function mintVerify(address cToken, address minter, uint256 actualMintAmount, uint256 mintTokens)
+        external
+        virtual
+        override
+    {}
 
     /**
      * @notice 检查账户是否应被允许在给定市场赎回代币
@@ -266,10 +258,7 @@ contract Comptroller is
      * @param redeemer 将赎回代币的账户
      * @param redeemTokens 要交换为市场底层资产的cToken数量
      */
-    function redeemAllowed(address cToken, address redeemer, uint256 redeemTokens)
-        external
-        override
-    {
+    function redeemAllowed(address cToken, address redeemer, uint256 redeemTokens) external override {
         redeemAllowedInternal(cToken, redeemer, redeemTokens);
 
         // 保持飞轮运转
@@ -277,10 +266,7 @@ contract Comptroller is
         distributeSupplierComp(cToken, redeemer);
     }
 
-    function redeemAllowedInternal(address cToken, address redeemer, uint256 redeemTokens)
-        internal
-        view
-    {
+    function redeemAllowedInternal(address cToken, address redeemer, uint256 redeemTokens) internal view {
         if (!markets[cToken].isListed) {
             revert Comptroller__CTokenNotInList(cToken);
         }
@@ -302,12 +288,11 @@ contract Comptroller is
     }
 
     // 预留钩子
-    function redeemVerify(
-        address cToken,
-        address redeemer,
-        uint256 redeemAmount,
-        uint256 redeemTokens
-    ) external virtual override { }
+    function redeemVerify(address cToken, address redeemer, uint256 redeemAmount, uint256 redeemTokens)
+        external
+        virtual
+        override
+    {}
 
     /**
      * @notice 检查账户是否应被允许借用给定市场的底层资产
@@ -315,10 +300,7 @@ contract Comptroller is
      * @param borrower 将借用资产的账户
      * @param borrowAmount 账户将借用的底层数量
      */
-    function borrowAllowed(address cToken, address borrower, uint256 borrowAmount)
-        external
-        override
-    {
+    function borrowAllowed(address cToken, address borrower, uint256 borrowAmount) external override {
         require(!_borrowGuardianPaused, "borrow is paused");
 
         if (!markets[cToken].isListed) {
@@ -355,18 +337,14 @@ contract Comptroller is
         }
 
         //使用Exp结构体，是因为线性继承是结构体不占用slot，不会使ComptrollerVxStorage的slot错位/冲突
-        Exp memory borrowIndex = Exp({ mantissa: CToken(cToken).borrowIndex() });
+        Exp memory borrowIndex = Exp({mantissa: CToken(cToken).borrowIndex()});
         // 保持飞轮运转
         updateCompBorrowIndex(cToken, borrowIndex);
         distributeBorrowerComp(cToken, borrower, borrowIndex);
     }
 
     // 预留钩子
-    function borrowVerify(address cToken, address borrower, uint256 borrowAmount)
-        external
-        virtual
-        override
-    { }
+    function borrowVerify(address cToken, address borrower, uint256 borrowAmount) external virtual override {}
 
     /**
      * @notice 检查账户是否应被允许在给定市场偿还借贷
@@ -375,12 +353,10 @@ contract Comptroller is
      * @param borrower 借用了资产的账户
      * @param repayAmount 账户将偿还的底层资产数量
      */
-    function repayBorrowAllowed(
-        address cToken,
-        address payer,
-        address borrower,
-        uint256 repayAmount
-    ) external override {
+    function repayBorrowAllowed(address cToken, address payer, address borrower, uint256 repayAmount)
+        external
+        override
+    {
         payer;
         borrower;
         repayAmount;
@@ -390,7 +366,7 @@ contract Comptroller is
         }
 
         // 保持飞轮运转
-        Exp memory borrowIndex = Exp({ mantissa: CToken(cToken).borrowIndex() });
+        Exp memory borrowIndex = Exp({mantissa: CToken(cToken).borrowIndex()});
         updateCompBorrowIndex(cToken, borrowIndex);
         distributeBorrowerComp(cToken, borrower, borrowIndex);
     }
@@ -402,7 +378,7 @@ contract Comptroller is
         address borrower,
         uint256 actualRepayAmount,
         uint256 borrowerIndex
-    ) external virtual override { }
+    ) external virtual override {}
 
     /**
      * @notice 检查是否应被允许进行清算
@@ -442,8 +418,7 @@ contract Comptroller is
             }
 
             //限制单次清算中最多能偿还的债务比例
-            uint256 maxClose =
-                mul_ScalarTruncate(Exp({ mantissa: closeFactorMantissa }), borrowBalance);
+            uint256 maxClose = mul_ScalarTruncate(Exp({mantissa: closeFactorMantissa}), borrowBalance);
             if (repayAmount > maxClose) {
                 revert Comptroller__HasIncorrectLiquidity();
             }
@@ -458,7 +433,7 @@ contract Comptroller is
         address borrower,
         uint256 actualRepayAmount,
         uint256 seizeTokens
-    ) external override { }
+    ) external override {}
 
     /**
      * @notice 检查是否应被允许扣押资产
@@ -502,7 +477,7 @@ contract Comptroller is
         address liquidator,
         address borrower,
         uint256 seizeTokens
-    ) external override { }
+    ) external override {}
 
     /**
      * @notice 检查账户是否应被允许在给定市场转移代币
@@ -511,10 +486,7 @@ contract Comptroller is
      * @param dst 接收代币的账户
      * @param transferTokens 要转移的cToken数量
      */
-    function transferAllowed(address cToken, address src, address dst, uint256 transferTokens)
-        external
-        override
-    {
+    function transferAllowed(address cToken, address src, address dst, uint256 transferTokens) external override {
         // 暂停是非常严重的情况 - 我们要触发警报
         require(!transferGuardianPaused, "transfer is paused");
 
@@ -529,10 +501,7 @@ contract Comptroller is
     }
 
     // 预留钩子
-    function transferVerify(address cToken, address src, address dst, uint256 transferTokens)
-        external
-        override
-    { }
+    function transferVerify(address cToken, address src, address dst, uint256 transferTokens) external override {}
 
     //////////////////////////////////////////////////////////////////////////////////
     ////////////////////// 流动性计算和清算价格模块 //////////////////////////////////////
@@ -575,11 +544,7 @@ contract Comptroller is
      *             账户超过抵押品要求的流动性，
      *          账户低于抵押品要求的缺口）
      */
-    function getAccountLiquidityInternal(address account)
-        internal
-        view
-        returns (bool, uint256, uint256)
-    {
+    function getAccountLiquidityInternal(address account) internal view returns (bool, uint256, uint256) {
         return getHypotheticalAccountLiquidityInternal(account, CToken(address(0)), 0, 0);
     }
 
@@ -600,9 +565,7 @@ contract Comptroller is
         uint256 borrowAmount
     ) public view returns (bool, uint256, uint256) {
         (bool result, uint256 liquidity, uint256 shortfall) =
-        getHypotheticalAccountLiquidityInternal(
-            account, CToken(cTokenModify), redeemTokens, borrowAmount
-        );
+            getHypotheticalAccountLiquidityInternal(account, CToken(cTokenModify), redeemTokens, borrowAmount);
         return (result, liquidity, shortfall);
     }
 
@@ -642,32 +605,27 @@ contract Comptroller is
             }
 
             //获取当前资产的抵押因子
-            vars.collateralFactor =
-                Exp({ mantissa: markets[address(asset)].collateralFactorMantissa });
+            vars.collateralFactor = Exp({mantissa: markets[address(asset)].collateralFactorMantissa});
 
             vars.oraclePriceMantissa = oracle.getUnderlyingPrice(asset);
             if (vars.oraclePriceMantissa == 0) {
                 return (false, 0, 0);
             }
             // 获取当前资产的价值
-            vars.oraclePrice = Exp({ mantissa: vars.oraclePriceMantissa });
+            vars.oraclePrice = Exp({mantissa: vars.oraclePriceMantissa});
 
             // 获取CToken的汇率
-            vars.exchangeRate = Exp({ mantissa: vars.exchangeRateMantissa });
+            vars.exchangeRate = Exp({mantissa: vars.exchangeRateMantissa});
 
             // 计算抵押品的有效价值
-            vars.tokensToDenom =
-                mul_(mul_(vars.collateralFactor, vars.exchangeRate), vars.oraclePrice);
+            vars.tokensToDenom = mul_(mul_(vars.collateralFactor, vars.exchangeRate), vars.oraclePrice);
 
             // 累加进总抵押价值记录中
-            vars.sumCollateral = mul_ScalarTruncateAddUInt(
-                vars.tokensToDenom, vars.cTokenBalance, vars.sumCollateral
-            );
+            vars.sumCollateral = mul_ScalarTruncateAddUInt(vars.tokensToDenom, vars.cTokenBalance, vars.sumCollateral);
 
             // 计算总借款价值
-            vars.sumBorrowPlusEffects = mul_ScalarTruncateAddUInt(
-                vars.oraclePrice, vars.borrowBalance, vars.sumBorrowPlusEffects
-            );
+            vars.sumBorrowPlusEffects =
+                mul_ScalarTruncateAddUInt(vars.oraclePrice, vars.borrowBalance, vars.sumBorrowPlusEffects);
 
             //4. 模拟假设操作的影响
             if (asset == cTokenModify) {
@@ -677,16 +635,14 @@ contract Comptroller is
                 // 不是这样做：sumCollateral -= tokensToDenom * redeemTokens
                 // 而是这样做：vars.sumBorrowPlusEffects += tokensToDenom * redeemTokens
                 // 人话就是：赎回的这部分价值，我给他累加起来，当作借款，最后判断总抵押是否大于总借款。
-                vars.sumBorrowPlusEffects = mul_ScalarTruncateAddUInt(
-                    vars.tokensToDenom, redeemTokens, vars.sumBorrowPlusEffects
-                );
+                vars.sumBorrowPlusEffects =
+                    mul_ScalarTruncateAddUInt(vars.tokensToDenom, redeemTokens, vars.sumBorrowPlusEffects);
 
                 // 借贷效应
                 // 增加借款价值
                 // 这里就比较好理解了，因为是借款，直接累加到总借款中，最后判断总抵押是否大于总借款即可。
-                vars.sumBorrowPlusEffects = mul_ScalarTruncateAddUInt(
-                    vars.oraclePrice, borrowAmount, vars.sumBorrowPlusEffects
-                );
+                vars.sumBorrowPlusEffects =
+                    mul_ScalarTruncateAddUInt(vars.oraclePrice, borrowAmount, vars.sumBorrowPlusEffects);
             }
         }
 
@@ -707,11 +663,12 @@ contract Comptroller is
      * @param actualRepayAmount 要转换为cTokenCollateral代币的cTokenBorrowed底层数量
      * @return (错误代码, 在清算中要扣押的cTokenCollateral代币数量)
      */
-    function liquidateCalculateSeizeTokens(
-        address cTokenBorrowed,
-        address cTokenCollateral,
-        uint256 actualRepayAmount
-    ) external view override returns (bool, uint256) {
+    function liquidateCalculateSeizeTokens(address cTokenBorrowed, address cTokenCollateral, uint256 actualRepayAmount)
+        external
+        view
+        override
+        returns (bool, uint256)
+    {
         /* 读取借入市场和抵押市场的预言机价格 */
         uint256 priceBorrowedMantissa = oracle.getUnderlyingPrice(CToken(cTokenBorrowed));
         uint256 priceCollateralMantissa = oracle.getUnderlyingPrice(CToken(cTokenCollateral));
@@ -731,13 +688,8 @@ contract Comptroller is
         Exp memory denominator;
         Exp memory ratio;
 
-        numerator = mul_(
-            Exp({ mantissa: liquidationIncentiveMantissa }),
-            Exp({ mantissa: priceBorrowedMantissa })
-        );
-        denominator = mul_(
-            Exp({ mantissa: priceCollateralMantissa }), Exp({ mantissa: exchangeRateMantissa })
-        );
+        numerator = mul_(Exp({mantissa: liquidationIncentiveMantissa}), Exp({mantissa: priceBorrowedMantissa}));
+        denominator = mul_(Exp({mantissa: priceCollateralMantissa}), Exp({mantissa: exchangeRateMantissa}));
         ratio = div_(numerator, denominator);
 
         seizeTokens = mul_ScalarTruncate(ratio, actualRepayAmount);
@@ -793,20 +745,17 @@ contract Comptroller is
      * @param cToken 要设置因子的市场
      * @param newCollateralFactorMantissa 新的抵押因子，按 1e18 缩放
      */
-    function _setCollateralFactor(CToken cToken, uint256 newCollateralFactorMantissa)
-        external
-        onlyOwner
-    {
+    function _setCollateralFactor(CToken cToken, uint256 newCollateralFactorMantissa) external onlyOwner {
         // 验证市场是否被列出
         Market storage market = markets[address(cToken)];
         if (!market.isListed) {
             revert Comptroller__CTokenNotInList(address(cToken));
         }
 
-        Exp memory newCollateralFactorExp = Exp({ mantissa: newCollateralFactorMantissa });
+        Exp memory newCollateralFactorExp = Exp({mantissa: newCollateralFactorMantissa});
 
         // 检查抵押因子 <= 0.9
-        Exp memory highLimit = Exp({ mantissa: collateralFactorMaxMantissa });
+        Exp memory highLimit = Exp({mantissa: collateralFactorMaxMantissa});
         if (lessThanExp(highLimit, newCollateralFactorExp)) {
             revert Comptroller__HasIncorrectLiquidity();
         }
@@ -839,9 +788,7 @@ contract Comptroller is
         liquidationIncentiveMantissa = newLiquidationIncentiveMantissa;
 
         // 发出包含旧奖励和新奖励的事件
-        emit NewLiquidationIncentive(
-            oldLiquidationIncentiveMantissa, newLiquidationIncentiveMantissa
-        );
+        emit NewLiquidationIncentive(oldLiquidationIncentiveMantissa, newLiquidationIncentiveMantissa);
     }
 
     /**
@@ -906,10 +853,7 @@ contract Comptroller is
      * @param cTokens 要更改借贷上限的市场（代币）地址
      * @param newBorrowCaps 要设置的新借贷上限值（底层资产）。值为0对应无限制借贷。
      */
-    function _setMarketBorrowCaps(CToken[] calldata cTokens, uint256[] calldata newBorrowCaps)
-        external
-        onlyOwner
-    {
+    function _setMarketBorrowCaps(CToken[] calldata cTokens, uint256[] calldata newBorrowCaps) external onlyOwner {
         uint256 numMarkets = cTokens.length;
         uint256 numBorrowCaps = newBorrowCaps.length;
 
@@ -953,10 +897,7 @@ contract Comptroller is
 
     function _setMintPaused(CToken cToken, bool state) public returns (bool) {
         require(markets[address(cToken)].isListed, "cannot pause a market that is not listed");
-        require(
-            msg.sender == pauseGuardian || msg.sender == owner(),
-            "only pause guardian and admin can pause"
-        );
+        require(msg.sender == pauseGuardian || msg.sender == owner(), "only pause guardian and admin can pause");
         require(msg.sender == owner() || state == true, "only admin can unpause");
 
         mintGuardianPaused[address(cToken)] = state;
@@ -966,10 +907,7 @@ contract Comptroller is
 
     function _setBorrowPaused(CToken cToken, bool state) public returns (bool) {
         require(markets[address(cToken)].isListed, "cannot pause a market that is not listed");
-        require(
-            msg.sender == pauseGuardian || msg.sender == owner(),
-            "only pause guardian and admin can pause"
-        );
+        require(msg.sender == pauseGuardian || msg.sender == owner(), "only pause guardian and admin can pause");
         require(msg.sender == owner() || state == true, "only admin can unpause");
 
         borrowGuardianPaused[address(cToken)] = state;
@@ -978,10 +916,7 @@ contract Comptroller is
     }
 
     function _setTransferPaused(bool state) public returns (bool) {
-        require(
-            msg.sender == pauseGuardian || msg.sender == owner(),
-            "only pause guardian and admin can pause"
-        );
+        require(msg.sender == pauseGuardian || msg.sender == owner(), "only pause guardian and admin can pause");
         require(msg.sender == owner() || state == true, "only admin can unpause");
 
         transferGuardianPaused = state;
@@ -990,10 +925,7 @@ contract Comptroller is
     }
 
     function _setSeizePaused(bool state) public returns (bool) {
-        require(
-            msg.sender == pauseGuardian || msg.sender == owner(),
-            "only pause guardian and admin can pause"
-        );
+        require(msg.sender == pauseGuardian || msg.sender == owner(), "only pause guardian and admin can pause");
         require(msg.sender == owner() || state == true, "only admin can unpause");
 
         seizeGuardianPaused = state;
@@ -1011,9 +943,7 @@ contract Comptroller is
      * @param supplySpeed 市场的新供应方COMP速度
      * @param borrowSpeed 市场的新借贷方COMP速度
      */
-    function setCompSpeedInternal(CToken cToken, uint256 supplySpeed, uint256 borrowSpeed)
-        internal
-    {
+    function setCompSpeedInternal(CToken cToken, uint256 supplySpeed, uint256 borrowSpeed) internal {
         Market storage market = markets[address(cToken)];
         require(market.isListed, "comp market is not listed");
 
@@ -1032,7 +962,7 @@ contract Comptroller is
             // Borrow speed updated so let's update borrow state to ensure that
             //  1. COMP accrued properly for the old speed, and
             //  2. COMP accrued at the new speed starts after this block.
-            Exp memory borrowIndex = Exp({ mantissa: cToken.borrowIndex() });
+            Exp memory borrowIndex = Exp({mantissa: cToken.borrowIndex()});
             updateCompBorrowIndex(address(cToken), borrowIndex);
 
             // Update speed and emit event
@@ -1054,12 +984,9 @@ contract Comptroller is
         if (deltaBlocks > 0 && supplySpeed > 0) {
             uint256 supplyTokens = CToken(cToken).totalSupply();
             uint256 compAccrued = mul_(deltaBlocks, supplySpeed);
-            Double memory ratio =
-                supplyTokens > 0 ? fraction(compAccrued, supplyTokens) : Double({ mantissa: 0 });
-            supplyState.index = safe224(
-                add_(Double({ mantissa: supplyState.index }), ratio).mantissa,
-                "new index exceeds 224 bits"
-            );
+            Double memory ratio = supplyTokens > 0 ? fraction(compAccrued, supplyTokens) : Double({mantissa: 0});
+            supplyState.index =
+                safe224(add_(Double({mantissa: supplyState.index}), ratio).mantissa, "new index exceeds 224 bits");
             supplyState.block = blockNumber;
         } else if (deltaBlocks > 0) {
             supplyState.block = blockNumber;
@@ -1079,12 +1006,9 @@ contract Comptroller is
         if (deltaBlocks > 0 && borrowSpeed > 0) {
             uint256 borrowAmount = div_(CToken(cToken).totalBorrows(), marketBorrowIndex);
             uint256 compAccrued = mul_(deltaBlocks, borrowSpeed);
-            Double memory ratio =
-                borrowAmount > 0 ? fraction(compAccrued, borrowAmount) : Double({ mantissa: 0 });
-            borrowState.index = safe224(
-                add_(Double({ mantissa: borrowState.index }), ratio).mantissa,
-                "new index exceeds 224 bits"
-            );
+            Double memory ratio = borrowAmount > 0 ? fraction(compAccrued, borrowAmount) : Double({mantissa: 0});
+            borrowState.index =
+                safe224(add_(Double({mantissa: borrowState.index}), ratio).mantissa, "new index exceeds 224 bits");
             borrowState.block = blockNumber;
         } else if (deltaBlocks > 0) {
             borrowState.block = blockNumber;
@@ -1115,7 +1039,7 @@ contract Comptroller is
         }
 
         // 计算每个cToken累积COMP的累积和变化
-        Double memory deltaIndex = Double({ mantissa: sub_(supplyIndex, supplierIndex) });
+        Double memory deltaIndex = Double({mantissa: sub_(supplyIndex, supplierIndex)});
 
         uint256 supplierTokens = CToken(cToken).balanceOf(supplier);
 
@@ -1134,9 +1058,7 @@ contract Comptroller is
      * @param cToken 借款人正在交互的市场
      * @param borrower 要分发COMP的借款人地址
      */
-    function distributeBorrowerComp(address cToken, address borrower, Exp memory marketBorrowIndex)
-        internal
-    {
+    function distributeBorrowerComp(address cToken, address borrower, Exp memory marketBorrowIndex) internal {
         // TODO：如果用户不在借款人市场中，则不分发供应商COMP。
         // 这个检查应该尽可能高效地使用燃料，因为distributeBorrowerComp在很多地方被调用。
         // - 我们真的不想调用外部合约，因为这非常昂贵。
@@ -1155,10 +1077,9 @@ contract Comptroller is
         }
 
         // 计算每个借入单位累积COMP的累积和变化
-        Double memory deltaIndex = Double({ mantissa: sub_(borrowIndex, borrowerIndex) });
+        Double memory deltaIndex = Double({mantissa: sub_(borrowIndex, borrowerIndex)});
 
-        uint256 borrowerAmount =
-            div_(CToken(cToken).borrowBalanceStored(borrower), marketBorrowIndex);
+        uint256 borrowerAmount = div_(CToken(cToken).borrowBalanceStored(borrower), marketBorrowIndex);
 
         // 计算累积COMP：cTokenAmount * accruedPerBorrowedUnit
         uint256 borrowerDelta = mul_(borrowerAmount, deltaIndex);
@@ -1212,17 +1133,12 @@ contract Comptroller is
      * @param borrowers 是否领取通过借贷赚取的COMP
      * @param suppliers 是否领取通过供应赚取的COMP
      */
-    function claimComp(
-        address[] memory holders,
-        CToken[] memory cTokens,
-        bool borrowers,
-        bool suppliers
-    ) public {
+    function claimComp(address[] memory holders, CToken[] memory cTokens, bool borrowers, bool suppliers) public {
         for (uint256 i = 0; i < cTokens.length; i++) {
             CToken cToken = cTokens[i];
             require(markets[address(cToken)].isListed, "market must be listed");
             if (borrowers == true) {
-                Exp memory borrowIndex = Exp({ mantissa: cToken.borrowIndex() });
+                Exp memory borrowIndex = Exp({mantissa: cToken.borrowIndex()});
                 updateCompBorrowIndex(address(cToken), borrowIndex);
                 for (uint256 j = 0; j < holders.length; j++) {
                     distributeBorrowerComp(address(cToken), holders[j], borrowIndex);
@@ -1278,11 +1194,10 @@ contract Comptroller is
      * @param supplySpeeds 对应市场的新供应方COMP速度。
      * @param borrowSpeeds 对应市场的新借贷方COMP速度。
      */
-    function _setCompSpeeds(
-        CToken[] memory cTokens,
-        uint256[] memory supplySpeeds,
-        uint256[] memory borrowSpeeds
-    ) public onlyOwner {
+    function _setCompSpeeds(CToken[] memory cTokens, uint256[] memory supplySpeeds, uint256[] memory borrowSpeeds)
+        public
+        onlyOwner
+    {
         uint256 numTokens = cTokens.length;
         require(
             numTokens == supplySpeeds.length && numTokens == borrowSpeeds.length,
@@ -1328,8 +1243,8 @@ contract Comptroller is
      * @param cToken 要检查是否废弃的市场
      */
     function isDeprecated(CToken cToken) public view returns (bool) {
-        return markets[address(cToken)].collateralFactorMantissa == 0
-            && borrowGuardianPaused[address(cToken)] == true && cToken.reserveFactorMantissa() == 1e18;
+        return markets[address(cToken)].collateralFactorMantissa == 0 && borrowGuardianPaused[address(cToken)] == true
+            && cToken.reserveFactorMantissa() == 1e18;
     }
 
     function getBlockNumber() public view virtual returns (uint256) {
@@ -1344,5 +1259,5 @@ contract Comptroller is
         comp = _comp;
     }
 
-    function _authorizeUpgrade(address newImplementation) internal override onlyOwner { }
+    function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 }

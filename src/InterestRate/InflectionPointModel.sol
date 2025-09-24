@@ -5,10 +5,7 @@ import "./abstract/InterestRateModel.sol";
 
 contract InflectionPointModel is InterestRateModel {
     event NewInterestParams(
-        uint256 baseRatePerBlock,
-        uint256 multiplierPerBlock,
-        uint256 jumpMultiplierPerBlock,
-        uint256 kink
+        uint256 baseRatePerBlock, uint256 multiplierPerBlock, uint256 jumpMultiplierPerBlock, uint256 kink
     );
 
     uint256 private constant BASE = 1e18;
@@ -20,12 +17,7 @@ contract InflectionPointModel is InterestRateModel {
     uint256 public jumpMultiplierPerBlock;
     uint256 public kink;
 
-    constructor(
-        uint256 baseRatePerYear,
-        uint256 multiplierPerYear,
-        uint256 jumpMultiplierPerYear,
-        uint256 _kink
-    ) {
+    constructor(uint256 baseRatePerYear, uint256 multiplierPerYear, uint256 jumpMultiplierPerYear, uint256 _kink) {
         baseRatePerBlock = baseRatePerYear / blocksPerYear;
         multiplierPerBlock = multiplierPerYear / blocksPerYear;
         jumpMultiplierPerBlock = jumpMultiplierPerYear / blocksPerYear;
@@ -34,11 +26,7 @@ contract InflectionPointModel is InterestRateModel {
         emit NewInterestParams(baseRatePerBlock, multiplierPerBlock, jumpMultiplierPerBlock, kink);
     }
 
-    function utilizationRate(uint256 cash, uint256 borrows, uint256 reserves)
-        public
-        pure
-        returns (uint256)
-    {
+    function utilizationRate(uint256 cash, uint256 borrows, uint256 reserves) public pure returns (uint256) {
         if (borrows == 0) {
             return 0;
         }
@@ -46,12 +34,7 @@ contract InflectionPointModel is InterestRateModel {
         return (borrows * BASE) / (cash + borrows - reserves);
     }
 
-    function getBorrowRate(uint256 cash, uint256 borrows, uint256 reserves)
-        public
-        view
-        override
-        returns (uint256)
-    {
+    function getBorrowRate(uint256 cash, uint256 borrows, uint256 reserves) public view override returns (uint256) {
         uint256 ur = utilizationRate(cash, borrows, reserves);
         if (ur <= kink) {
             return (ur * multiplierPerBlock) / BASE + baseRatePerBlock;
@@ -62,12 +45,12 @@ contract InflectionPointModel is InterestRateModel {
         }
     }
 
-    function getSupplyRate(
-        uint256 cash,
-        uint256 borrows,
-        uint256 reserves,
-        uint256 reserveFactorMantissa
-    ) external view override returns (uint256) {
+    function getSupplyRate(uint256 cash, uint256 borrows, uint256 reserves, uint256 reserveFactorMantissa)
+        external
+        view
+        override
+        returns (uint256)
+    {
         uint256 oneMinusReserveFactor = BASE - reserveFactorMantissa;
         uint256 borrowRate = getBorrowRate(cash, borrows, reserves);
         uint256 rateToPool = (borrowRate * oneMinusReserveFactor) / BASE;

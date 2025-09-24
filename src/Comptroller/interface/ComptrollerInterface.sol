@@ -16,35 +16,21 @@ abstract contract ComptrollerInterface {
      */
     function mintAllowed(address cToken, address minter, uint256 mintAmount) external virtual;
 
-    function mintVerify(address cToken, address minter, uint256 mintAmount, uint256 mintTokens)
+    function mintVerify(address cToken, address minter, uint256 mintAmount, uint256 mintTokens) external virtual;
+
+    function redeemAllowed(address cToken, address redeemer, uint256 redeemTokens) external virtual;
+
+    function redeemVerify(address cToken, address redeemer, uint256 redeemAmount, uint256 redeemTokens)
         external
         virtual;
 
-    function redeemAllowed(address cToken, address redeemer, uint256 redeemTokens)
+    function borrowAllowed(address cToken, address borrower, uint256 borrowAmount) external virtual;
+
+    function borrowVerify(address cToken, address borrower, uint256 borrowAmount) external virtual;
+
+    function repayBorrowAllowed(address cToken, address payer, address borrower, uint256 repayAmount)
         external
         virtual;
-
-    function redeemVerify(
-        address cToken,
-        address redeemer,
-        uint256 redeemAmount,
-        uint256 redeemTokens
-    ) external virtual;
-
-    function borrowAllowed(address cToken, address borrower, uint256 borrowAmount)
-        external
-        virtual;
-
-    function borrowVerify(address cToken, address borrower, uint256 borrowAmount)
-        external
-        virtual;
-
-    function repayBorrowAllowed(
-        address cToken,
-        address payer,
-        address borrower,
-        uint256 repayAmount
-    ) external virtual;
 
     function repayBorrowVerify(
         address cToken,
@@ -87,20 +73,16 @@ abstract contract ComptrollerInterface {
         uint256 seizeTokens
     ) external virtual;
 
-    function transferAllowed(address cToken, address src, address dst, uint256 transferTokens)
-        external
-        virtual;
+    function transferAllowed(address cToken, address src, address dst, uint256 transferTokens) external virtual;
 
-    function transferVerify(address cToken, address src, address dst, uint256 transferTokens)
-        external
-        virtual;
+    function transferVerify(address cToken, address src, address dst, uint256 transferTokens) external virtual;
 
     /**
      * Liquidity/Liquidation Calculations **
      */
-    function liquidateCalculateSeizeTokens(
-        address cTokenBorrowed,
-        address cTokenCollateral,
-        uint256 repayAmount
-    ) external view virtual returns (bool, uint256);
+    function liquidateCalculateSeizeTokens(address cTokenBorrowed, address cTokenCollateral, uint256 repayAmount)
+        external
+        view
+        virtual
+        returns (bool, uint256);
 }

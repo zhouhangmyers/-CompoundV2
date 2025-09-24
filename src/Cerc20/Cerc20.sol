@@ -22,14 +22,7 @@ contract CErc20 is CToken, CErc20Interface, UUPSUpgradeable {
         uint8 _decimals
     ) public initializer {
         __UUPSUpgradeable_init();
-        super.initialize(
-            _comptroller,
-            _interestRateModel,
-            _initialExchangeRateMantissa,
-            _name,
-            _symbol,
-            _decimals
-        );
+        super.initialize(_comptroller, _interestRateModel, _initialExchangeRateMantissa, _name, _symbol, _decimals);
 
         underlying = _underlying;
 
@@ -62,20 +55,16 @@ contract CErc20 is CToken, CErc20Interface, UUPSUpgradeable {
         return true;
     }
 
-    function repayBorrowBehalf(address borrower, uint256 repayAmount)
-        external
-        override
-        returns (bool)
-    {
+    function repayBorrowBehalf(address borrower, uint256 repayAmount) external override returns (bool) {
         repayBorrowBehalfInternal(borrower, repayAmount);
         return true;
     }
 
-    function liquidateBorrow(
-        address borrower,
-        uint256 repayAmount,
-        CTokenInterface cTokenCollateral
-    ) external override returns (bool) {
+    function liquidateBorrow(address borrower, uint256 repayAmount, CTokenInterface cTokenCollateral)
+        external
+        override
+        returns (bool)
+    {
         liquidateBorrowInternal(borrower, repayAmount, cTokenCollateral);
         return true;
     }
@@ -95,12 +84,7 @@ contract CErc20 is CToken, CErc20Interface, UUPSUpgradeable {
         return token.balanceOf(address(this));
     }
 
-    function doTransferIn(address from, uint256 amount)
-        internal
-        virtual
-        override
-        returns (uint256)
-    {
+    function doTransferIn(address from, uint256 amount) internal virtual override returns (uint256) {
         // Read from storage once
         address underlying_ = underlying;
         IERC20 token = IERC20(underlying_);
@@ -167,5 +151,5 @@ contract CErc20 is CToken, CErc20Interface, UUPSUpgradeable {
         CompLike(underlying).delegate(compLikeDelegatee);
     }
 
-    function _authorizeUpgrade(address newImplementation) internal override onlyOwner { }
+    function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 }

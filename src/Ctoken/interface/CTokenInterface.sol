@@ -9,9 +9,7 @@ abstract contract CTokenInterface is CTokenStorage {
     /**
      * @notice Event emitted when interest is accrued
      */
-    event AccrueInterest(
-        uint256 cashPrior, uint256 interestAccumulated, uint256 borrowIndex, uint256 totalBorrows
-    );
+    event AccrueInterest(uint256 cashPrior, uint256 interestAccumulated, uint256 borrowIndex, uint256 totalBorrows);
 
     /**
      * @notice Event emitted when tokens are minted
@@ -26,30 +24,20 @@ abstract contract CTokenInterface is CTokenStorage {
     /**
      * @notice Event emitted when underlying is borrowed
      */
-    event Borrow(
-        address borrower, uint256 borrowAmount, uint256 accountBorrows, uint256 totalBorrows
-    );
+    event Borrow(address borrower, uint256 borrowAmount, uint256 accountBorrows, uint256 totalBorrows);
 
     /**
      * @notice Event emitted when a borrow is repaid
      */
     event RepayBorrow(
-        address payer,
-        address borrower,
-        uint256 repayAmount,
-        uint256 accountBorrows,
-        uint256 totalBorrows
+        address payer, address borrower, uint256 repayAmount, uint256 accountBorrows, uint256 totalBorrows
     );
 
     /**
      * @notice Event emitted when a borrow is liquidated
      */
     event LiquidateBorrow(
-        address liquidator,
-        address borrower,
-        uint256 repayAmount,
-        address cTokenCollateral,
-        uint256 seizeTokens
+        address liquidator, address borrower, uint256 repayAmount, address cTokenCollateral, uint256 seizeTokens
     );
 
     /**
@@ -74,9 +62,7 @@ abstract contract CTokenInterface is CTokenStorage {
     /**
      * @notice Event emitted when interestRateModel is changed
      */
-    event NewMarketInterestRateModel(
-        InterestRateModel oldInterestRateModel, InterestRateModel newInterestRateModel
-    );
+    event NewMarketInterestRateModel(InterestRateModel oldInterestRateModel, InterestRateModel newInterestRateModel);
 
     /**
      * @notice Event emitted when the reserve factor is changed
@@ -109,19 +95,12 @@ abstract contract CTokenInterface is CTokenStorage {
      * User Interface **
      */
     function transfer(address dst, uint256 amount) external virtual returns (bool);
-    function transferFrom(address src, address dst, uint256 amount)
-        external
-        virtual
-        returns (bool);
+    function transferFrom(address src, address dst, uint256 amount) external virtual returns (bool);
     function approve(address spender, uint256 amount) external virtual returns (bool);
     function allowance(address owner, address spender) external view virtual returns (uint256);
     function balanceOf(address owner) external view virtual returns (uint256);
     function balanceOfUnderlying(address owner) external virtual returns (uint256);
-    function getAccountSnapshot(address account)
-        external
-        view
-        virtual
-        returns (bool, uint256, uint256, uint256);
+    function getAccountSnapshot(address account) external view virtual returns (bool, uint256, uint256, uint256);
     function borrowRatePerBlock() external view virtual returns (uint256);
     function supplyRatePerBlock() external view virtual returns (uint256);
     function totalBorrowsCurrent() external virtual returns (uint256);

@@ -19,16 +19,12 @@ abstract contract CErc20Interface is CErc20Storage {
 
     function repayBorrow(uint256 repayAmount) external virtual returns (bool);
 
-    function repayBorrowBehalf(address borrower, uint256 repayAmount)
+    function repayBorrowBehalf(address borrower, uint256 repayAmount) external virtual returns (bool);
+
+    function liquidateBorrow(address borrower, uint256 repayAmount, CTokenInterface cTokenCollateral)
         external
         virtual
         returns (bool);
-
-    function liquidateBorrow(
-        address borrower,
-        uint256 repayAmount,
-        CTokenInterface cTokenCollateral
-    ) external virtual returns (bool);
 
     function sweepToken(IERC20 token) external virtual; //use SafeERC20
 
